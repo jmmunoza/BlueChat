@@ -8,7 +8,7 @@ import jmmunoza.jmmunoza.bluechat.model.listeners.OnMessageReceivedListener;
 public interface IBluetoothService {
     List<Device> findDevices();
     void connect(Device device);
-    void disconnect();
-    void sendMessage(String message);
+    void disconnect(Device device);
+    void sendMessage(Device device, String message);
     void setOnMessageReceivedListener(OnMessageReceivedListener listener);
 }
