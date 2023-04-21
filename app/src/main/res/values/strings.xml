@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BlueChat</string>
+    <string name="devices">Devices</string>
+    <string name="chats">Chats</string>
 </resources>

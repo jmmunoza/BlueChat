@@ -9,4 +9,5 @@ public interface IBluetoothService {
     void disconnect(Device device);
     void sendMessage(Device device, String message);
     void setOnMessageReceivedListener(OnMessageReceivedListener listener);
+    void stop();
 }

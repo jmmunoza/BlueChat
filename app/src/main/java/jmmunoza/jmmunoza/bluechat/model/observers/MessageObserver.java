@@ -7,13 +7,13 @@ import jmmunoza.jmmunoza.bluechat.model.entities.Message;
 import jmmunoza.jmmunoza.bluechat.model.listeners.OnMessageReceivedListener;
 
 public class MessageObserver {
-    private List<OnMessageReceivedListener> onMessageReceivedListeners;
+    private static List<OnMessageReceivedListener> onMessageReceivedListeners;
 
     private MessageObserver(){
         onMessageReceivedListeners = new ArrayList<>();
     }
 
-    public void addOnMessageReceivedListener(OnMessageReceivedListener listener) {
+    public static void addOnMessageReceivedListener(OnMessageReceivedListener listener) {
         if (onMessageReceivedListeners == null) {
             new MessageObserver();
         }
@@ -23,17 +23,15 @@ public class MessageObserver {
         }
     }
 
-    public void removeOnMessageReceivedListener(OnMessageReceivedListener listener) {
+    public static void removeOnMessageReceivedListener(OnMessageReceivedListener listener) {
         if (onMessageReceivedListeners == null) {
             new MessageObserver();
         }
 
-        if(onMessageReceivedListeners.contains(listener)){
-            onMessageReceivedListeners.remove(listener);
-        }
+        onMessageReceivedListeners.remove(listener);
     }
 
-    public void notifyOnMessageReceived(Message message){
+    public static void notifyOnMessageReceived(Message message){
         if (onMessageReceivedListeners == null) {
             new MessageObserver();
         }

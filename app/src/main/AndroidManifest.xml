@@ -33,6 +33,11 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".view.activities.HomeActivity">
+        </activity>
     </application>
 
 </manifest>

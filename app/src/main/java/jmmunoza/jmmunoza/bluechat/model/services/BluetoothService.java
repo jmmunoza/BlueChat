@@ -14,8 +14,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.os.SystemClock;
+
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -24,10 +27,12 @@ import jmmunoza.jmmunoza.bluechat.BlueChatApp;
 import jmmunoza.jmmunoza.bluechat.model.entities.Device;
 import jmmunoza.jmmunoza.bluechat.model.interfaces.IBluetoothService;
 import jmmunoza.jmmunoza.bluechat.model.listeners.OnMessageReceivedListener;
+import jmmunoza.jmmunoza.bluechat.model.observers.DeviceObserver;
 
 public class BluetoothService implements IBluetoothService {
-    private Activity activity;
-    private BluetoothAdapter bluetoothAdapter;
+    private final Activity activity;
+    private final BluetoothAdapter bluetoothAdapter;
+    private  BroadcastReceiver bluetoothReceiver;
 
     public BluetoothService(Activity activity) {
         this.activity = activity;
@@ -59,41 +64,40 @@ public class BluetoothService implements IBluetoothService {
     @Override
     public void findDevices() {
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        bluetoothReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    String deviceName = device.getName();
-                    String deviceHardwareAddress = device.getAddress();
+                    Device device = new Device(bluetoothDevice.getName(), bluetoothDevice.getAddress());
 
-                    if(deviceName != null) {
-                        System.out.println(deviceName + " " + deviceHardwareAddress);
+                    if (device.getName() != null) {
+                        DeviceObserver.notifyOnDeviceFoundListener(device);
                     }
                 }
             }
         };
 
-        activity.registerReceiver(receiver, filter);
+        activity.registerReceiver(bluetoothReceiver, filter);
         Executor executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            while(true){
+        executor.execute(findDevicesRunnable);
+    }
+
+    private final Runnable findDevicesRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
                 assert bluetoothAdapter != null;
                 if (bluetoothAdapter.isDiscovering()) {
                     bluetoothAdapter.cancelDiscovery();
                 }
 
-                bluetoothAdapter.startDiscovery();
-                try {
-                    Thread.sleep(12000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                System.out.println(bluetoothAdapter.startDiscovery());
+                SystemClock.sleep(6000);
             }
-        });
-
-    }
+        }
+    };
 
     @Override
     public void connect(Device device) {
@@ -113,5 +117,10 @@ public class BluetoothService implements IBluetoothService {
     @Override
     public void setOnMessageReceivedListener(OnMessageReceivedListener listener) {
 
+    }
+
+    @Override
+    public void stop() {
+        if (bluetoothReceiver != null) activity.unregisterReceiver(bluetoothReceiver);
     }
 }

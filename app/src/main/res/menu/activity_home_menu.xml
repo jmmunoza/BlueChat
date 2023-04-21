@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/devices" android:id="@+id/action_devices" android:icon="@drawable/baseline_devices_24"/>
+    <item android:title="@string/chats" android:id="@+id/action_chats" android:icon="@drawable/baseline_wechat_24"/>
+</menu>
