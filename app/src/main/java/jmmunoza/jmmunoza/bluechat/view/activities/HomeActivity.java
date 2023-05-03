@@ -15,11 +15,14 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import jmmunoza.jmmunoza.bluechat.R;
+import jmmunoza.jmmunoza.bluechat.model.entities.Device;
+import jmmunoza.jmmunoza.bluechat.model.listeners.OnDeviceSelectedListener;
+import jmmunoza.jmmunoza.bluechat.model.observers.DeviceObserver;
 import jmmunoza.jmmunoza.bluechat.model.services.BluetoothService;
 import jmmunoza.jmmunoza.bluechat.view.fragments.FragmentChats;
 import jmmunoza.jmmunoza.bluechat.view.fragments.FragmentDevices;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements OnDeviceSelectedListener {
     // Fragments
     private FragmentChats fragmentChats;
     private FragmentDevices fragmentDevices;
@@ -45,6 +48,8 @@ public class HomeActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             loadComponents();
         }
+
+        DeviceObserver.addOnDeviceSelectedListener(this);
 
     }
 
@@ -92,6 +97,11 @@ public class HomeActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    @Override
+    public void onDeviceSelected(Device device) {
+        bluetoothService.connect(device);
     }
 
     private class PagerAdapter extends FragmentStateAdapter {
@@ -142,6 +152,7 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        DeviceObserver.removeOnDeviceSelectedListener(this);
         bluetoothService.stop();
         super.onDestroy();
     }

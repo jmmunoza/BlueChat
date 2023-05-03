@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,10 +17,11 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 
-
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -28,11 +30,15 @@ import jmmunoza.jmmunoza.bluechat.model.entities.Device;
 import jmmunoza.jmmunoza.bluechat.model.interfaces.IBluetoothService;
 import jmmunoza.jmmunoza.bluechat.model.listeners.OnMessageReceivedListener;
 import jmmunoza.jmmunoza.bluechat.model.observers.DeviceObserver;
+import jmmunoza.jmmunoza.bluechat.model.threads.AcceptThread;
+import jmmunoza.jmmunoza.bluechat.model.threads.ConnectThread;
+import jmmunoza.jmmunoza.bluechat.model.threads.ConnectedThread;
 
 public class BluetoothService implements IBluetoothService {
     private final Activity activity;
     private final BluetoothAdapter bluetoothAdapter;
     private  BroadcastReceiver bluetoothReceiver;
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     public BluetoothService(Activity activity) {
         this.activity = activity;
@@ -59,6 +65,10 @@ public class BluetoothService implements IBluetoothService {
         } else {
             findDevices();
         }
+
+        assert bluetoothAdapter != null;
+        AcceptThread acceptThread = new AcceptThread(bluetoothAdapter);
+        acceptThread.start();
     }
 
     @Override
@@ -93,7 +103,7 @@ public class BluetoothService implements IBluetoothService {
                     bluetoothAdapter.cancelDiscovery();
                 }
 
-                System.out.println(bluetoothAdapter.startDiscovery());
+                bluetoothAdapter.startDiscovery();
                 SystemClock.sleep(6000);
             }
         }
@@ -101,6 +111,16 @@ public class BluetoothService implements IBluetoothService {
 
     @Override
     public void connect(Device device) {
+        BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(device.getAddress());
+        try {
+            BluetoothSocket bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(MY_UUID);
+            bluetoothSocket.connect();
+            ConnectedThread connectedThread = new ConnectedThread(bluetoothSocket);
+            connectedThread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 

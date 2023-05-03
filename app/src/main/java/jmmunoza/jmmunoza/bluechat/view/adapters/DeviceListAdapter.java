@@ -79,7 +79,6 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.Vi
 
     @Override
     public void onDeviceFound(Device device) {
-        System.out.println(device);
         addDevice(device);
     }
 
@@ -93,6 +92,11 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.Vi
 
             deviceName     = itemView.findViewById(R.id.adapter_device_list_name);
             deviceAddress    = itemView.findViewById(R.id.adapter_device_list_address);
+
+            itemView.setOnClickListener(v -> {
+                Device device = devices.get(getAdapterPosition());
+                DeviceObserver.notifyOnDeviceSelectedListener(device);
+            });
         }
     }
 }
